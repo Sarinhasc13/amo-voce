@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quer Namorar Comigo?</title>
+    <!-- Biblioteca de confetes para a chuva de corações/brilhos -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        /* Estilos e Cores (CSS) */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+        }
+
+        h1 {
+            color: #d63384;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .heart-icon {
+            font-size: 50px;
+            animation: pulse 1.2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+            min-height: 50px;
+            position: relative;
+        }
+
+        button {
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .btn-sim {
+            background-color: #28a745;
+            color: white;
+            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-sim:hover {
+            background-color: #218838;
+            transform: scale(1.05);
+        }
+
+        .btn-nao {
+            background-color: #dc3545;
+            color: white;
+            position: absolute;
+            box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
+            transition: left 0.15s ease, top 0.15s ease;
+        }
+
+        /* Seção das Motivações/Porquês */
+        .reasons-box {
+            margin-top: 30px;
+            border-top: 2px dashed #ffb6c1;
+            padding-top: 20px;
+        }
+
+        .reasons-box h2 {
+            color: #444;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+
+        .reason-card {
+            background: #fff0f5;
+            padding: 15px;
+            border-radius: 12px;
+            color: #d63384;
+            font-weight: 600;
+            margin-bottom: 15px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-reason {
+            background-color: #ff69b4;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .btn-reason:hover {
+            background-color: #ff1493;
+        }
+
+        /* Mensagem Secreta / Surpresa */
+        .mensagem-sucesso {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #d4edda;
+            border-radius: 15px;
+            color: #155724;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="mainContainer">
+        <div class="heart-icon">💖</div>
+        <h1>Quer namorar comigo? ❤💍</h1>
+        
+        <!-- Área dos Botões Interativos -->
+        <div class="buttons" id="btnGroup">
+            <button class="btn-sim" onclick="aceitou()">SIM!</button>
+            <button class="btn-nao" id="btnNao" onmouseover="fugir()" onclick="fugir()">Não</button>
+        </div>
+
+        <div id="mensagemSucesso" class="mensagem-sucesso">
+            🎉 Eu sabia que você ia aceitar! Mas lamento informar que só tem namoro se tiver pedido de verdade 💍.<br><br>
+            Até lá, parabéns: você foi promovido(a) a ficante premium! Rs ❤
+        </div>
+
+        <!-- Gerador / Contador de Porquês -->
+        <div class="reasons-box">
+            <h2>Motivos pelos quais devemos namorar:</h2>
+            <div class="reason-card" id="txtMotivo">
+                Clique no botão abaixo para descobrir um motivo!
+            </div>
+            <button class="btn-reason" onclick="mostrarProximoMotivo()">
+                Gerar Motivo (<span id="contador">0</span>/<span id="totalMotivos">0</span>)
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. LÓGICA DO BOTÃO "NÃO" FUGINDO ---
+        const btnNao = document.getElementById('btnNao');
+        const container = document.getElementById('mainContainer');
+
+        function fugir() {
+            // Pega as dimensões do container
+            const containerRect = container.getBoundingClientRect();
+            
+            // Calcula posições aleatórias mantendo o botão dentro do container
+            const maxX = containerRect.width - btnNao.offsetWidth - 20;
+            const maxY = containerRect.height - btnNao.offsetHeight - 20;
+
+            const randomX = Math.floor(Math.random() * maxX);
+            const randomY = Math.floor(Math.random() * maxY);
+
+            // Aplica as novas posições
+            btnNao.style.left = randomX + 'px';
+            btnNao.style.top = randomY + 'px';
+        }
+
+        // --- 2. LÓGICA DO "SIM" (CHUVA DE CORAÇÕES/CONFITES) ---
+        function aceitou() {
+            // Exibe mensagem de sucesso
+            document.getElementById('mensagemSucesso').style.display = 'block';
+
+            // Efeito de chuva de confetes/corações usando a biblioteca canvas-confetti
+            var duration = 3 * 1000;
+            var animationEnd = Date.now() + duration;
+
+            (function frame() {
+                // Lança confetes dos dois lados da tela
+                confetti({
+                    particleCount: 5,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: ['#ff0000', '#ff69b4', '#ffffff']
+                });
+                confetti({
+                    particleCount: 5,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: ['#ff0000', '#ff69b4', '#ffffff']
+                });
+
+                if (Date.now() < animationEnd) {
+                    requestAnimationFrame(frame);
+                }
+            })();
+        }
+
+        // --- 3. LÓGICA DOS PORQUÊS / MOTIVOS ---
+        // Adicione ou altere os motivos nesta lista abaixo:
+        const motivos = [
+            "1. Nossa conexão é surreal.",
+            "2. Nossos abraços são os melhores do mundo.",
+            "3. Formamos a dupla perfeita com o humor duvidável.",
+            "4. Nossos beijos se encaixam perfeitamente.",
+            "5. A gente se complementa igual café com leite.",
+            "6. Porque meu dia fica 100% melhor quando falo com você!",
+            "7. Passamos leveza e tranquilidade um para o outro.",
+            "8. Tenho as melhores risadas ao seu lado.",
+            "9. Somos brincalhões.",
+            "10. E por fim, e muito importante: Nosso sexo é gostoso demais, Rs ❤."
+        ];
+
+        let indiceAtual = 0;
+        document.getElementById('totalMotivos').innerText = motivos.length;
+
+        function mostrarProximoMotivo() {
+            const txtMotivo = document.getElementById('txtMotivo');
+            const contador = document.getElementById('contador');
+
+            txtMotivo.innerText = motivos[indiceAtual];
+            contador.innerText = indiceAtual + 1;
+
+            // Passa para o próximo motivo (volta ao 0 se chegar ao fim)
+            indiceAtual = (indiceAtual + 1) % motivos.length;
+        }
+    </script>
+</body>
+</html>
